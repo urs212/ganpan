@@ -1,391 +1,382 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <title>간판 에디터</title>
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
+<meta charset="UTF-8" />
+<title>간판 에디터</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
 
-    body {
-      margin: 0;
-      background: #222;
-      font-family: 'Jua', sans-serif;
-      color: white;
-    }
+  body {
+    margin: 0;
+    background: #222;
+    font-family: 'Jua', sans-serif;
+    color: white;
+  }
 
-    #controls {
-      padding: 16px;
-      background: #333;
-      text-align: center;
-    }
+  #controls {
+    padding: 16px;
+    background: #333;
+    text-align: center;
+  }
 
-    button, select, input[type="color"] {
-      padding: 8px 12px;
-      margin: 6px;
-      border: none;
-      border-radius: 6px;
-      font-size: 14px;
-      cursor: pointer;
-    }
+  button, select, input[type="color"] {
+    padding: 8px 12px;
+    margin: 6px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+  }
 
-    #fontSizeControl {
-      display: none;
-      color: white;
-      margin-top: 10px;
-    }
+  #fontSizeControl {
+    display: none;
+    color: white;
+    margin-top: 10px;
+  }
 
-    #canvasArea {
-      position: relative;
-      width: 960px;
-      height: 540px;
-      margin: 20px auto;
-      background: linear-gradient(135deg, #ffe082, #ffcc80);
-      border: 8px solid #000;
-      border-radius: 24px;
-      overflow: hidden;
-      box-shadow: 0 0 50px #f57c00;
-    }
+  #canvasArea {
+    position: relative;
+    width: 960px;
+    height: 540px;
+    margin: 20px auto;
+    background: linear-gradient(135deg, #ffe082, #ffcc80);
+    border: 8px solid #000;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 0 50px #f57c00;
+  }
 
-    .shape {
-      position: absolute;
-      opacity: 0.15;
-    }
+  .shape {
+    position: absolute;
+    opacity: 0.15;
+  }
 
-    .circle {
-      width: 200px;
-      height: 200px;
-      border-radius: 50%;
-      background: #ef5350;
-      top: 30px;
-      left: 50px;
-    }
+  .circle {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: #ef5350;
+    top: 30px;
+    left: 50px;
+  }
 
-    .triangle {
-      width: 0;
-      height: 0;
-      border-left: 100px solid transparent;
-      border-right: 100px solid transparent;
-      border-bottom: 200px solid #8e24aa;
-      top: 100px;
-      right: 40px;
-    }
+  .triangle {
+    width: 0;
+    height: 0;
+    border-left: 100px solid transparent;
+    border-right: 100px solid transparent;
+    border-bottom: 200px solid #8e24aa;
+    top: 100px;
+    right: 40px;
+  }
 
-    .star::before {
-      content: '★';
-      font-size: 160px;
-      color: #42a5f5;
-    }
+  .star::before {
+    content: '★';
+    font-size: 160px;
+    color: #42a5f5;
+  }
 
-    .star {
-      position: absolute;
-      top: 300px;
-      left: 120px;
-      opacity: 0.15;
-    }
+  .star {
+    position: absolute;
+    top: 300px;
+    left: 120px;
+    opacity: 0.15;
+  }
 
-    .text-box {
-      position: absolute;
-      min-width: 100px;
-      min-height: 40px;
-      padding: 10px;
-      background: rgba(255,255,255,0.3);
-      border: 2px dashed #fff;
-      border-radius: 12px;
-      color: #000;
-      font-size: 32px;
-      cursor: move;
-      user-select: none;
-      resize: both;
-      overflow: auto;
-    }
+  .text-box {
+    position: absolute;
+    min-width: 100px;
+    min-height: 40px;
+    padding: 10px;
+    background: rgba(255,255,255,0.3);
+    border: 2px dashed #fff;
+    border-radius: 12px;
+    color: #000;
+    font-size: 32px;
+    cursor: move;
+    user-select: none;
+    resize: horizontal; /* 가로로만 크기 조절 가능 */
+    overflow: auto;
+  }
 
-    .text-box:focus {
-      outline: none;
-      background: rgba(255,255,255,0.5);
-    }
-  </style>
+  .text-box:focus {
+    outline: none;
+    background: rgba(255,255,255,0.5);
+  }
+</style>
 </head>
 <body>
 
-  <div id="controls">
-    <button onclick="addTextBox()">📝 텍스트 추가</button>
-    <input type="file" accept="image/*" onchange="addImage(event)">
-    <label>글자색: <input type="color" id="colorPicker" value="#000000"></label>
-    <select onchange="changeFont(this.value)">
-      <option value="Jua">Jua</option>
-      <option value="sans-serif">Sans-serif</option>
-      <option value="serif">Serif</option>
-    </select>
-    <button onclick="downloadAsImage()">⬇ JPG 저장</button>
+<div id="controls">
+  <button onclick="addTextBox()">📝 텍스트 추가</button>
+  <input type="file" accept="image/*" onchange="addImage(event)">
+  <label>글자색: <input type="color" id="colorPicker" value="#000000"></label>
+  <select onchange="changeFont(this.value)">
+    <option value="Jua">Jua</option>
+    <option value="sans-serif">Sans-serif</option>
+    <option value="serif">Serif</option>
+  </select>
+  <button onclick="downloadAsImage()">⬇ JPG 저장</button>
 
-    <!-- 프로젝트 저장/불러기능 버튼 추가 -->
-    <button onclick="saveProject()">💾 저장 (.ganpan)</button>
-    <input type="file" id="loadFile" accept=".ganpan" style="display:none" onchange="loadProject(event)">
-    <button onclick="document.getElementById('loadFile').click()">📂 불러오기 (.ganpan)</button>
+  <button onclick="saveProject()">💾 저장 (.ganpan)</button>
+  <input type="file" id="loadFile" accept=".ganpan" style="display:none" onchange="loadProject(event)">
+  <button onclick="document.getElementById('loadFile').click()">📂 불러오기 (.ganpan)</button>
 
-    <div id="fontSizeControl">
-      <label>폰트 크기:
-        <input type="range" id="fontSizeSlider" min="12" max="100" value="32">
-      </label>
-    </div>
+  <div id="fontSizeControl">
+    <label>폰트 크기:
+      <input type="range" id="fontSizeSlider" min="12" max="100" value="32">
+    </label>
   </div>
+</div>
 
-  <div id="canvasArea">
-    <div class="shape circle"></div>
-    <div class="shape triangle"></div>
-    <div class="shape star"></div>
-  </div>
+<div id="canvasArea">
+  <div class="shape circle"></div>
+  <div class="shape triangle"></div>
+  <div class="shape star"></div>
+</div>
 
-  <script>
-    let currentFont = 'Jua';
-    let selectedTextBox = null;
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+  let currentFont = 'Jua';
+  let selectedTextBox = null;
 
-    function addTextBox() {
-      const box = document.createElement('div');
-      box.className = 'text-box';
-      box.contentEditable = true;
-      box.innerText = '텍스트';
-      box.style.left = '100px';
-      box.style.top = '100px';
-      box.style.fontFamily = currentFont;
-      box.style.color = document.getElementById('colorPicker').value;
-      box.style.fontSize = '32px';
-      box.style.width = 'auto';
-      box.style.height = 'auto';
-      makeDraggable(box);
-      box.addEventListener('click', e => {
-        e.stopPropagation();
-        selectTextBox(box);
-      });
-      document.getElementById('canvasArea').appendChild(box);
+  function addTextBox() {
+    const box = document.createElement('div');
+    box.className = 'text-box';
+    box.contentEditable = true;
+    box.innerText = '텍스트';
+    box.style.left = '100px';
+    box.style.top = '100px';
+    box.style.fontFamily = currentFont;
+    box.style.color = document.getElementById('colorPicker').value;
+    box.style.fontSize = '32px';
+    box.style.width = 'auto';
+    box.style.height = 'auto';
+    makeDraggable(box);
+    box.addEventListener('click', e => {
+      e.stopPropagation();
       selectTextBox(box);
-      box.focus();
-    }
+    });
+    document.getElementById('canvasArea').appendChild(box);
+    selectTextBox(box);
+    box.focus();
+  }
 
-    function makeDraggable(el) {
-      let isDragging = false;
-      let startX, startY, offsetX, offsetY;
+  function makeDraggable(el) {
+    let isDragging = false;
+    let startX, startY, offsetX, offsetY;
 
-      el.addEventListener('mousedown', e => {
-        // 드래그는 마우스 왼쪽 버튼만 작동
-        if (e.button !== 0) return;
+    el.addEventListener('mousedown', e => {
+      if (e.button !== 0) return;
 
-        if (e.target === el) {
-          startX = e.clientX;
-          startY = e.clientY;
-          offsetX = e.clientX - el.offsetLeft;
-          offsetY = e.clientY - el.offsetTop;
+      if (e.target === el) {
+        startX = e.clientX;
+        startY = e.clientY;
+        offsetX = e.clientX - el.offsetLeft;
+        offsetY = e.clientY - el.offsetTop;
 
-          const onMouseMove = (e) => {
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
+        const onMouseMove = (e) => {
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
 
-            if (!isDragging && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
-              isDragging = true;
-            }
+          if (!isDragging && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
+            isDragging = true;
+          }
 
-            if (isDragging) {
-              el.style.left = `${e.clientX - offsetX}px`;
-              el.style.top = `${e.clientY - offsetY}px`;
-            }
-          };
+          if (isDragging) {
+            el.style.left = `${e.clientX - offsetX}px`;
+            el.style.top = `${e.clientY - offsetY}px`;
+          }
+        };
 
-          const onMouseUp = () => {
-            document.removeEventListener('mousemove', onMouseMove);
-            document.removeEventListener('mouseup', onMouseUp);
-            isDragging = false;
-          };
+        const onMouseUp = () => {
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+          isDragging = false;
+        };
 
-          document.addEventListener('mousemove', onMouseMove);
-          document.addEventListener('mouseup', onMouseUp);
-        }
-      });
-    }
-
-    function changeFont(font) {
-      currentFont = font;
-      if (selectedTextBox) {
-        selectedTextBox.style.fontFamily = font;
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
       }
-    }
+    });
+  }
 
-    function addImage(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = document.createElement('img');
-        img.src = e.target.result;
-        img.style.position = 'absolute';
-        img.style.maxWidth = '200px';
-        img.style.top = '60px';
-        img.style.left = '60px';
-        img.style.cursor = 'move';
-        makeDraggable(img);
-        document.getElementById('canvasArea').appendChild(img);
-      };
-      reader.readAsDataURL(file);
+  function changeFont(font) {
+    currentFont = font;
+    if (selectedTextBox) {
+      selectedTextBox.style.fontFamily = font;
     }
+  }
 
-    function downloadAsImage() {
-      document.getElementById('fontSizeControl').style.display = 'none';
-      html2canvas(document.getElementById('canvasArea')).then(canvas => {
-        const link = document.createElement('a');
-        link.download = '간판.jpg';
-        link.href = canvas.toDataURL('image/jpeg');
-        link.click();
-        if (selectedTextBox) document.getElementById('fontSizeControl').style.display = 'inline-block';
+  function addImage(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.style.position = 'absolute';
+      img.style.maxWidth = '200px';
+      img.style.top = '60px';
+      img.style.left = '60px';
+      img.style.cursor = 'move';
+      makeDraggable(img);
+      document.getElementById('canvasArea').appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function downloadAsImage() {
+    document.getElementById('fontSizeControl').style.display = 'none';
+    html2canvas(document.getElementById('canvasArea')).then(canvas => {
+      const link = document.createElement('a');
+      link.download = '간판.jpg';
+      link.href = canvas.toDataURL('image/jpeg');
+      link.click();
+      if (selectedTextBox) document.getElementById('fontSizeControl').style.display = 'inline-block';
+    });
+  }
+
+  function selectTextBox(box) {
+    selectedTextBox = box;
+    document.getElementById('fontSizeControl').style.display = 'inline-block';
+    document.getElementById('fontSizeSlider').value = parseInt(getComputedStyle(box).fontSize);
+    document.getElementById('colorPicker').value = rgbToHex(getComputedStyle(box).color);
+
+    document.getElementById('fontSizeSlider').oninput = () => {
+      if (selectedTextBox) {
+        selectedTextBox.style.fontSize = `${document.getElementById('fontSizeSlider').value}px`;
+      }
+    };
+
+    document.getElementById('colorPicker').oninput = () => {
+      if (selectedTextBox) {
+        selectedTextBox.style.color = document.getElementById('colorPicker').value;
+      }
+    };
+  }
+
+  document.addEventListener('click', () => {
+    selectedTextBox = null;
+    document.getElementById('fontSizeControl').style.display = 'none';
+  });
+
+  function rgbToHex(rgb) {
+    const result = rgb.match(/\d+/g).map(x => parseInt(x).toString(16).padStart(2, '0'));
+    return `#${result.join('')}`;
+  }
+
+  // 프로젝트 저장
+  function saveProject() {
+    const canvas = document.getElementById('canvasArea');
+
+    const texts = [];
+    canvas.querySelectorAll('.text-box').forEach(box => {
+      texts.push({
+        text: box.innerText,
+        left: box.style.left,
+        top: box.style.top,
+        fontFamily: box.style.fontFamily,
+        fontSize: box.style.fontSize,
+        color: box.style.color,
+        width: box.style.width,
+        height: box.style.height,
       });
-    }
-
-    function selectTextBox(box) {
-      selectedTextBox = box;
-      document.getElementById('fontSizeControl').style.display = 'inline-block';
-      document.getElementById('fontSizeSlider').value = parseInt(getComputedStyle(box).fontSize);
-      document.getElementById('colorPicker').value = rgbToHex(getComputedStyle(box).color);
-
-      document.getElementById('fontSizeSlider').oninput = () => {
-        if (selectedTextBox) {
-          selectedTextBox.style.fontSize = `${document.getElementById('fontSizeSlider').value}px`;
-        }
-      };
-
-      document.getElementById('colorPicker').oninput = () => {
-        if (selectedTextBox) {
-          selectedTextBox.style.color = document.getElementById('colorPicker').value;
-        }
-      };
-    }
-
-    // 빈 곳 클릭 시 선택 해제
-    document.addEventListener('click', () => {
-      selectedTextBox = null;
-      document.getElementById('fontSizeControl').style.display = 'none';
     });
 
-    function rgbToHex(rgb) {
-      const result = rgb.match(/\d+/g).map(x => parseInt(x).toString(16).padStart(2, '0'));
-      return `#${result.join('')}`;
-    }
-
-    // --- 프로젝트 저장 함수 ---
-    function saveProject() {
-      const canvas = document.getElementById('canvasArea');
-
-      // 텍스트 박스 정보 수집
-      const texts = [];
-      canvas.querySelectorAll('.text-box').forEach(box => {
-        texts.push({
-          text: box.innerText,
-          left: box.style.left,
-          top: box.style.top,
-          fontFamily: box.style.fontFamily,
-          fontSize: box.style.fontSize,
-          color: box.style.color,
-          width: box.style.width,
-          height: box.style.height,
-        });
+    const images = [];
+    canvas.querySelectorAll('img').forEach(img => {
+      images.push({
+        src: img.src,
+        left: img.style.left,
+        top: img.style.top,
+        maxWidth: img.style.maxWidth,
+        width: img.style.width,
+        height: img.style.height,
       });
+    });
 
-      // 이미지 정보 수집
-      const images = [];
-      canvas.querySelectorAll('img').forEach(img => {
-        images.push({
-          src: img.src,
-          left: img.style.left,
-          top: img.style.top,
-          maxWidth: img.style.maxWidth,
-          width: img.style.width,
-          height: img.style.height,
-        });
-      });
+    const project = { texts, images };
 
-      // 전체 프로젝트 객체 생성
-      const project = {
-        texts,
-        images,
-      };
+    const json = JSON.stringify(project, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
 
-      const json = JSON.stringify(project, null, 2);
-      const blob = new Blob([json], {type: "application/json"});
-      const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'project.ganpan';
+    a.click();
 
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'project.ganpan';
-      a.click();
+    URL.revokeObjectURL(url);
+  }
 
-      URL.revokeObjectURL(url);
-    }
+  // 프로젝트 불러오기
+  function loadProject(event) {
+    const file = event.target.files[0];
+    if (!file) return;
 
-    // --- 프로젝트 불러오기 함수 ---
-    function loadProject(event) {
-      const file = event.target.files[0];
-      if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const project = JSON.parse(e.target.result);
+        const canvas = document.getElementById('canvasArea');
 
-      const reader = new FileReader();
-      reader.onload = e => {
-        try {
-          const project = JSON.parse(e.target.result);
-          const canvas = document.getElementById('canvasArea');
+        // 기존 텍스트 박스 및 이미지 제거
+        canvas.querySelectorAll('.text-box').forEach(el => el.remove());
+        canvas.querySelectorAll('img').forEach(el => el.remove());
 
-          // 기존 텍스트 박스 및 이미지 삭제
-          canvas.querySelectorAll('.text-box').forEach(el => el.remove());
-          canvas.querySelectorAll('img').forEach(el => el.remove());
+        // 텍스트 박스 복원
+        project.texts.forEach(data => {
+          const box = document.createElement('div');
+          box.className = 'text-box';
+          box.contentEditable = true;
+          box.innerText = data.text;
+          box.style.left = data.left;
+          box.style.top = data.top;
+          box.style.fontFamily = data.fontFamily;
+          box.style.fontSize = data.fontSize;
+          box.style.color = data.color;
+          box.style.width = data.width || 'auto';
+          box.style.height = data.height || 'auto';
 
-          // 텍스트 박스 복원
-          project.texts.forEach(data => {
-            const box = document.createElement('div');
-            box.className = 'text-box';
-            box.contentEditable = true;
-            box.innerText = data.text;
-            box.style.left = data.left;
-            box.style.top = data.top;
-            box.style.fontFamily = data.fontFamily;
-            box.style.fontSize = data.fontSize;
-            box.style.color = data.color;
-            box.style.width = data.width || 'auto';
-            box.style.height = data.height || 'auto';
-
-            makeDraggable(box);
-            box.addEventListener('click', e => {
-              e.stopPropagation();
-              selectTextBox(box);
-            });
-
-            canvas.appendChild(box);
+          makeDraggable(box);
+          box.addEventListener('click', e => {
+            e.stopPropagation();
+            selectTextBox(box);
           });
 
-          // 이미지 복원
-          project.images.forEach(data => {
-            const img = document.createElement('img');
-            img.src = data.src;
-            img.style.position = 'absolute';
-            img.style.left = data.left;
-            img.style.top = data.top;
-            img.style.maxWidth = data.maxWidth || '200px';
-            img.style.width = data.width || '';
-            img.style.height = data.height || '';
-            img.style.cursor = 'move';
+          canvas.appendChild(box);
+        });
 
-            makeDraggable(img);
-            canvas.appendChild(img);
-          });
+        // 이미지 복원
+        project.images.forEach(data => {
+          const img = document.createElement('img');
+          img.src = data.src;
+          img.style.position = 'absolute';
+          img.style.left = data.left;
+          img.style.top = data.top;
+          img.style.maxWidth = data.maxWidth || '200px';
+          img.style.width = data.width || '';
+          img.style.height = data.height || '';
+          img.style.cursor = 'move';
 
-          selectedTextBox = null;
-          document.getElementById('fontSizeControl').style.display = 'none';
-          alert("프로젝트 불러오기 완료!");
-        } catch (error) {
-          alert("프로젝트 파일을 불러오는 데 실패했습니다.\n올바른 .ganpan 파일인지 확인하세요.");
-          console.error(error);
-        }
-      };
-      reader.readAsText(file);
-      // 파일 선택 후 초기화
-      event.target.value = "";
-    }
-  </script>
+          makeDraggable(img);
+          canvas.appendChild(img);
+        });
+
+        selectedTextBox = null;
+        document.getElementById('fontSizeControl').style.display = 'none';
+        alert('프로젝트가 정상적으로 불러와졌습니다!');
+      } catch (err) {
+        alert('유효하지 않은 .ganpan 파일입니다.');
+        console.error(err);
+      }
+    };
+    reader.readAsText(file);
+    // 파일 선택 초기화
+    event.target.value = "";
+  }
+</script>
 
 </body>
 </html>
